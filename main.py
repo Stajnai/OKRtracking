@@ -1,10 +1,9 @@
 import numpy as np
 import cv2
+import matplotlib as plt
 import os.path
 from os import path
 
-#notes for sof - attricbutes are lowercase and methods are capital
-#A project is created for any video analysis and requires a valid filepath to create
 class Project:
 
 	#codec to output the file
@@ -14,71 +13,78 @@ class Project:
 	def __init__(self,inputFilePath):
 		
 		#The class attributes
-		self.inputVideo = cv2.VideoCapture(inputFilePath)
 		self.inputFilePath = inputFilePath
-		self.outputFilePath = "OKRtracking.avi" #os.path.expanduser("~")+"//Downloads//"   <-- this is for downloads?
-		self.fps = 20.0
-		self.ratio = None #(width,height) is the convention
-		self.outputVideo = None
-		self.frame = None #place holder
-		
+		self.inputVideo = cv2.VideoCapture(inputFilePath)
+		self.frame = None
+		self.max = 0
+		self.min = 0		
 
 		#check the input file path by trying to read the first frame
 		try:
 			ret,self.frame = self.inputVideo.read()
-			height, width, channels = self.frame.shape 
-			self.ratio = (width,height)
-			self.outputVideo = cv2.VideoWriter(self.outputFilePath, Project.fourcc, self.fps, self.ratio) #this is saying what our output file is
+			self.frame = resize(self.frame)
+			self.frame = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
 		except:
 			self.inputFilePath = None
 			print("There was an error with the input file path.")
 
-	#sets the input file path
-	def setInputFilePath(self,inputFilePath):
-		#maybe only allow this if inputFilePath == None? can't change for project
-		try:
-			self.inputFilePath = inputFilePath
-			self.inputVideo = cv2.VideoCapture(inputFilePath)
-			ret,self.frame = self.inputVideo.read()
-			height, width, channels = self.frame.shape 
-			self.ratio = (width,height)
-			#maybe not do this here for orgnization?#self.outputVideo = cv2.VideoWriter(self.outputFilePath, Project.fourcc, self.fps, self.ratio) #this is saying what our output file is
-		except:
-			print("There was an error with the input file path.")
-
-	#sets the output file path and updates the output video codec function
-	def setOutputFilePath(self,outputFilePath):
-		self.outputFilePath = outputFilePath
-		#self.outputVideo = cv2.VideoWriter(self.outputFilePath, Project.fourcc, self.fps, self.ratio) #this is saying what our output file is
-		if path.exists(outputFilePath) == False:
-			self.outputFilePath = "OKRtracking.avi"
-			self.outputVideo = cv2.VideoWriter(self.outputFilePath, Project.fourcc, self.fps, self.ratio) #this is saying what our output file is
-			print("There was an error with the output file path")
-
 	
 	#returns true or false if a frame is read and update the self.frame attribute
-	def getFrame(self):
-		prevFrame = self.frame
+	def getNextFrame(self):
+		prevFrame = self.frame # for a try catch?
 		ret, self.frame = self.inputVideo.read()
+		self.frame = resize(self.frame)
+		self.frame = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
 		return ret, self.frame #do i need the self.frame?
+
+	def EdgeDetec(self):
+		
+		windowName = "Edge Detection"
+		cv2.namedWindow(windowName)
+		def onTrack(x) :
+			pass
+
+		cv2.createTrackbar("Max",windowName,0,255,onTrack)
+		cv2.createTrackbar("Min",windowName,0,255,onTrack)
+
+		loopFlag = 1
+		edge = self.frame #Needs to be here to allow higher scope
+		while cv2.getWindowProperty(windowName, 0) >= 0 :# Need to figure out X on fish fig& loopFlag >=0:# and cv2.getWindowProperty('Fish Edges', 0) >= 0):
+			
+			self.max = cv2.getTrackbarPos("Max",windowName)
+			self.min = cv2.getTrackbarPos("Min",windowName)
+			edge = cv2.Canny(self.frame, self.min, self.max)
+
+			#loopFlag = cv2.getWindowProperty('Fish Edges', 0)
+
+			cv2.imshow("Fish Edges",edge)
+
+			if cv2.waitKey(1) & 0xff == ord('q') or cv2.waitKey(1) & 0xff == ord('d'): #ord returns the unicode of that letter. 0xff makes it only look at 
+				#the last 8 bits of the wait key because it is 32bits and the incode is only 8 bits
+				break
+
+		#print(self.max, self.min)
+		cv2.destroyAllWindows()
+
+### separate??
+def resize(img):
+	height,width, _ = img.shape
+	
+	while (height > 1000 or width > 1000):
+		scale_percent = 0.95
+		width = int(img.shape[1] * scale_percent) #python makes it a float, and it needs an int
+		height = int(img.shape[0] * scale_percent)
+		img = cv2.resize(img,(width,height),interpolation = cv2.INTER_AREA)
+	return img
 
 
 #this is the "main" function
-SofsProject= Project("hello")#"TestData//stillFish.mp4")
-SofsProject.setInputFilePath("TestData//stillFish.mp4")
-#.imshow("fish",SofsProject.frame)
-if SofsProject.getFrame():
-	cv2.imshow("fish",SofsProject.frame)
+SofsProject = Project("TestData//LitFishVid.mp4")
 
-SofsProject.setOutputFilePath("testWrite.mp4") #for some reason it outputs two files if outputfil
-SofsProject.setOutputFilePath("testWriteCheck.mp4") #for some reason it outputs two files if outputfil
 
-#'''
-while SofsProject.getFrame()[0]:
-	SofsProject.outputVideo.write(SofsProject.frame)
+#cv2.imshow("Frame",SofsProject.frame)
+SofsProject.EdgeDetec()
 
-SofsProject.inputVideo.release()
-SofsProject.outputVideo.release()
-#'''
+
 cv2.waitKey(0)
 cv2.destroyAllWindows()

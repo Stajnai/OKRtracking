@@ -19,6 +19,7 @@ def resize(img):
 	return img
 
 
+#img = cv2.imread(".//TestData//LitFish.png",cv2.COLOR_BGR2GRAY)
 img = cv2.imread(".//TestData//LitFish.png",cv2.COLOR_BGR2GRAY)
 #plt.imshow(image) #you have to plot
 #plt.show()		  #and then show
@@ -52,7 +53,7 @@ while cv2.getWindowProperty('Canny Edge', 0) >= 0 :# Need to figure out X on fis
 		#the last 8 bits of the wait key because it is 32bits and the incode is only 8 bits
 		break
 
-print(mx, mn)
+#print(mx, mn)
 cv2.destroyAllWindows()
 
 #plt.imshow(img) #you have to plot
@@ -88,10 +89,16 @@ ax[0].set_axis_off()
 ax[1].imshow(cropImg, cmap=cm.gray)
 origin = np.array((0, cropImg.shape[1])) #bottom left
 lab = 1
-for _, angle, dist in zip(*hough_line_peaks(h, theta, d)):
+for _, angle, dist in zip(*hough_line_peaks(h, theta, d,num_peaks= 4)): # the angles are base off of the y axis??
+	#print("origin" + str(lab),origin)
+	print("angle" + str(lab),angle*(180/np.pi))
 	y0, y1 = (dist - origin * np.cos(angle)) / np.sin(angle)
-	ax[1].plot(origin, (y0, y1), '-',color = "C" + str(lab),label = str(lab))
+	print("yvalues" + str(lab),y0,y1)
+	print("distance"+str(lab),dist)
+	print()
+	ax[1].plot(origin, (y0, y1), '-o',color = "C" + str(lab),label = str(lab))
 	lab +=1
+
 ax[1].set_xlim(origin)
 ax[1].set_ylim((cropImg.shape[0], 0))
 ax[1].set_axis_off()
