@@ -17,7 +17,9 @@ class Project:
 		self.inputVideo = cv2.VideoCapture(inputFilePath)
 		self.frame = None
 		self.max = 0
-		self.min = 0		
+		self.min = 0	
+		self.roi1 = np.array([0,0])
+		self.roi2 = np.array([0,0])
 
 		#check the input file path by trying to read the first frame
 		try:
@@ -28,7 +30,6 @@ class Project:
 			self.inputFilePath = None
 			print("There was an error with the input file path.")
 
-	
 	#returns true or false if a frame is read and update the self.frame attribute
 	def getNextFrame(self):
 		prevFrame = self.frame # for a try catch?
@@ -66,6 +67,61 @@ class Project:
 		#print(self.max, self.min)
 		cv2.destroyAllWindows()
 
+	def setROI(self):
+
+		windowName = "ROI"
+		
+		def setROIHelper(event,x,y,flags,param):
+
+			img = (self.frame).copy()
+			if np.equal(self.roi1,np.array([0,0])).all():
+				cv2.putText(img,"Select UPPER LEFT bounds of the eyes.",(5,15),cv2.FONT_HERSHEY_SIMPLEX,0.5,(255,255,0),1)
+			else:
+				cv2.putText(img,"Select LOWER RIGHT bounds of the eyes.",(5,15),cv2.FONT_HERSHEY_SIMPLEX,0.5,(0,0,255),1)
+
+			if event == cv2.EVENT_MOUSEMOVE:
+
+				if np.not_equal(self.roi1,np.array([0,0])).all() and np.equal(self.roi2,np.array([0,0])).all(): #if the first selection made and the second isnt
+					cv2.rectangle(img,(self.roi1[0],self.roi1[1]),(x,y),(255,255,0),2)
+
+				elif np.not_equal(self.roi2,np.array([0,0])).all(): #if second selection made
+					cv2.rectangle(img,(self.roi1[0],self.roi1[1]),(self.roi2[0],self.roi2[1]),(255,255,0),2)
+					
+				cv2.imshow(windowName,img)
+
+			if event == cv2.EVENT_LBUTTONDOWN:
+				if np.equal(self.roi1,np.array([0,0])).all():
+					self.roi1[0] = x
+					self.roi1[1] = y
+				else:
+					self.roi2[0] = x
+					self.roi2[1] = y
+					return
+	
+		#end helper
+		cv2.imshow(windowName,self.frame) #this creates the window we will be working on too!!!
+		cv2.setMouseCallback(windowName,setROIHelper)
+
+		while cv2.getWindowProperty(windowName, 0) >= 0:
+			# display the image and wait for a keypress
+			print("in the while")
+			key = cv2.waitKey(1) & 0xFF
+			# if the 'r' key is pressed, reset the cropping region
+			if key == ord("r"):
+				self.roi1 = np.array([0,0])
+				self.roi2 = np.array([0,0])
+				img = (self.frame).copy()
+				cv2.putText(img,"Select UPPER LEFT bounds of the eyes.",(5,15),cv2.FONT_HERSHEY_SIMPLEX,0.5,(255,255,0),1)
+				cv2.imshow(windowName,img)
+			# if the 'c' key is pressed, break from the loop
+			elif key == ord("d"):
+				cv2.destroyAllWindows()
+
+		print("outside of while")
+		return
+				
+		
+
 ### separate??
 def resize(img):
 	height,width, _ = img.shape
@@ -84,6 +140,7 @@ SofsProject = Project("TestData//LitFishVid.mp4")
 
 #cv2.imshow("Frame",SofsProject.frame)
 SofsProject.EdgeDetec()
+SofsProject.setROI()
 
 
 cv2.waitKey(0)
