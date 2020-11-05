@@ -1,25 +1,13 @@
 import numpy as np
-import matplotlib as plt
+import matplotlib.pyplot as plt
 from matplotlib import cm
 
 import cv2
 from skimage.transform import hough_line, hough_line_peaks
-from skimage.feature import canny
-from skimage import data
 
 import os.path
 from os import path
 
-
-import numpy as np
-import cv2
-
-from skimage.transform import hough_line, hough_line_peaks
-from skimage.feature import canny
-from skimage import data
-
-import matplotlib.pyplot as plt
-from matplotlib import cm
 
 class Project:
 
