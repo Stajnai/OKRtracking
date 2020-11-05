@@ -1,8 +1,25 @@
 import numpy as np
-import cv2
 import matplotlib as plt
+from matplotlib import cm
+
+import cv2
+from skimage.transform import hough_line, hough_line_peaks
+from skimage.feature import canny
+from skimage import data
+
 import os.path
 from os import path
+
+
+import numpy as np
+import cv2
+
+from skimage.transform import hough_line, hough_line_peaks
+from skimage.feature import canny
+from skimage import data
+
+import matplotlib.pyplot as plt
+from matplotlib import cm
 
 class Project:
 
@@ -104,7 +121,6 @@ class Project:
 
 		while cv2.getWindowProperty(windowName, 0) >= 0:
 			# display the image and wait for a keypress
-			print("in the while")
 			key = cv2.waitKey(1) & 0xFF
 			# if the 'r' key is pressed, reset the cropping region
 			if key == ord("r"):
@@ -117,11 +133,51 @@ class Project:
 			elif key == ord("d"):
 				cv2.destroyAllWindows()
 
-		print("outside of while")
 		return
-				
-		
+	#end setROI
 
+	def lineTransform(self):
+		edge = cv2.Canny(self.frame,self.min,self.max)
+		cropImg = edge[self.roi1[1]:self.roi2[1] , self.roi1[0]:self.roi2[0]]
+
+		####################################
+		# Classic straight-line Hough transform
+		# Set a precision of 0.5 degree.
+		tested_angles = np.linspace(-np.pi / 2, np.pi / 2, 360)# This is saying take 360*2 steps from -90 counter cloack wise to +90*(180/np.pi)
+
+		h, theta, d = hough_line(cropImg, theta=tested_angles) # this returns hough transform accumulator, the angles, and distances from orgin to detected line
+
+
+		# Generating figure 1
+		fig, axes = plt.subplots(1, 2, figsize=(15, 6))
+		ax = axes.ravel()
+
+		ax[0].imshow(cropImg, cmap=cm.gray)
+		ax[0].set_title('Input image')
+		ax[0].set_axis_off()
+
+		ax[1].imshow(cropImg, cmap=cm.gray)
+		origin = np.array((0, cropImg.shape[1])) #bottom left
+
+		_, angle, dist = hough_line_peaks(h, theta, d,num_peaks= 4)
+		minIndex = np.where(dist == np.min(dist))
+		maxIndex = np.where(dist == np.max(dist))
+
+		miny0, miny1 = (dist[minIndex] - origin * np.cos(angle[minIndex])) / np.sin(angle[minIndex])
+		maxy0, maxy1 = (dist[maxIndex] - origin * np.cos(angle[maxIndex])) / np.sin(angle[maxIndex])
+
+		ax[1].plot(origin, (miny0, miny1),label = "left")
+		ax[1].plot(origin, (maxy0, maxy1), label = "right")
+
+		ax[1].set_xlim(origin)
+		ax[1].set_ylim((cropImg.shape[0], 0))
+		ax[1].set_axis_off()
+		ax[1].set_title('Detected lines')
+		ax[1].legend()
+
+		plt.tight_layout()
+		plt.show()
+				
 ### separate??
 def resize(img):
 	height,width, _ = img.shape
@@ -141,6 +197,7 @@ SofsProject = Project("TestData//LitFishVid.mp4")
 #cv2.imshow("Frame",SofsProject.frame)
 SofsProject.EdgeDetec()
 SofsProject.setROI()
+SofsProject.lineTransform()
 
 
 cv2.waitKey(0)
