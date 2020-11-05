@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 
 def resize(img):
-	height,width, _ = img.shape
+	height,width = img.shape
 	
 	while (height > 800 or width > 800):
 		scale_percent = 0.95
@@ -20,7 +20,7 @@ def resize(img):
 
 
 #img = cv2.imread(".//TestData//LitFish.png",cv2.COLOR_BGR2GRAY)
-img = cv2.imread(".//TestData//LitFish.png",cv2.COLOR_BGR2GRAY)
+img = cv2.imread(".//TestData//Left.png",cv2.COLOR_BGR2GRAY)
 #plt.imshow(image) #you have to plot
 #plt.show()		  #and then show
 
@@ -59,7 +59,7 @@ cv2.destroyAllWindows()
 #plt.imshow(img) #you have to plot
 #plt.show()		  #and then show
 
-cropImg = edge[250:350,200:400] #Y,X because rows, columns
+cropImg = edge[150:324,200:471] #Y,X because rows, columns
 #plt.imshow(cropImg)
 #plt.show()
 
@@ -89,7 +89,7 @@ ax[0].set_axis_off()
 ax[1].imshow(cropImg, cmap=cm.gray)
 origin = np.array((0, cropImg.shape[1])) #bottom left
 lab = 1
-for _, angle, dist in zip(*hough_line_peaks(h, theta, d,num_peaks= 4)): # the angles are base off of the y axis??
+for _, angle, dist in zip(*hough_line_peaks(h, theta, d,num_peaks= 10)): # the angles are base off of the y axis??
 	#print("origin" + str(lab),origin)
 	print("angle" + str(lab),angle*(180/np.pi))
 	y0, y1 = (dist - origin * np.cos(angle)) / np.sin(angle)

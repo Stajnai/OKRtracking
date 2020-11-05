@@ -120,6 +120,7 @@ class Project:
 			# if the 'c' key is pressed, break from the loop
 			elif key == ord("d"):
 				cv2.destroyAllWindows()
+				print(self.roi1[1],self.roi2[1] , self.roi1[0],self.roi2[0])
 
 		return
 	#end setROI
