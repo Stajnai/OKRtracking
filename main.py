@@ -28,6 +28,7 @@ class Project:
 		self.min = 0
 		self.roi1 = np.array([0,0])
 		self.roi2 = np.array([0,0])
+		self.eyeNum = 0
 
 		#check the input file path by trying to read the first frame
 		try:
@@ -140,7 +141,7 @@ class Project:
 			# if the 'c' key is pressed, break from the loop
 			elif key == ord("d"):
 				cv2.destroyAllWindows()
-				print(self.roi1[1],self.roi2[1] , self.roi1[0],self.roi2[0])
+				#print(self.roi1[1],self.roi2[1] , self.roi1[0],self.roi2[0])
 
 		return
 	#end setROI
@@ -170,14 +171,24 @@ class Project:
 		origin = np.array((0, cropImg.shape[1])) #bottom left
 
 		_, angle, dist = hough_line_peaks(h, theta, d,num_peaks= 4)
-		minIndex = np.where(dist == np.min(dist))
-		maxIndex = np.where(dist == np.max(dist))
 
-		miny0, miny1 = (dist[minIndex] - origin * np.cos(angle[minIndex])) / np.sin(angle[minIndex])
-		maxy0, maxy1 = (dist[maxIndex] - origin * np.cos(angle[maxIndex])) / np.sin(angle[maxIndex])
+		if self.eyeNum == -1:
+			index = np.where(dist == np.min(dist))
+			y0, y1 = (dist[index] - origin * np.cos(angle[index])) / np.sin(angle[index])
+			ax[1].plot(origin, (y0, y1),label = "left")
+		elif self.eyeNum == 1:
+			index = np.where(dist == np.max(dist))
+			y0, y1 = (dist[index] - origin * np.cos(angle[index])) / np.sin(angle[index])
+			ax[1].plot(origin, (y0, y1),label = "right")
+		else:
+			minIndex = np.where(dist == np.min(dist))
+			maxIndex = np.where(dist == np.max(dist))
 
-		ax[1].plot(origin, (miny0, miny1),label = "left")
-		ax[1].plot(origin, (maxy0, maxy1), label = "right")
+			miny0, miny1 = (dist[minIndex] - origin * np.cos(angle[minIndex])) / np.sin(angle[minIndex])
+			maxy0, maxy1 = (dist[maxIndex] - origin * np.cos(angle[maxIndex])) / np.sin(angle[maxIndex])
+
+			ax[1].plot(origin, (miny0, miny1),label = "left")
+			ax[1].plot(origin, (maxy0, maxy1), label = "right")
 
 		ax[1].set_xlim(origin)
 		ax[1].set_ylim((cropImg.shape[0], 0))
@@ -196,6 +207,12 @@ class Project:
 			self.writer.writeheader()
 		
 		self.writer.writerow({'leftEye': leftAngle, 'rightEye': rightAngle})
+
+	def setEyeNum(self,eyeNum):
+		if eyeNum >= -1 and eyeNum <= 1:
+			self.eyeNum = int(eyeNum) #for floating points to be discarded
+		else:
+			print("Bad eye number indicator")
 
 ### separate??
 def resize(img):
@@ -218,10 +235,15 @@ SofsProject = Project("TestData//LitFishVid.mp4")
 #SofsProject.setROI()
 #SofsProject.lineTransform()
 
-SofsProject.writeToFile()
+#SofsProject.writeToFile()
 #SofsProject.writeToFile(1,1)
 #SofsProject.writeToFile(2,2)
 #SofsProject.writeToFile(3,4)
+
+SofsProject.setEyeNum(1)
+SofsProject.EdgeDetec()
+SofsProject.setROI()
+SofsProject.lineTransform()
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
