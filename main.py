@@ -7,6 +7,7 @@ from skimage.transform import hough_line, hough_line_peaks
 
 import os.path
 from os import path
+import csv
 
 
 class Project:
@@ -20,6 +21,8 @@ class Project:
 		#The class attributes
 		self.inputFilePath = inputFilePath
 		self.inputVideo = cv2.VideoCapture(inputFilePath)
+		self.outputFileHandle = None
+		self.writer = None
 		self.frame = None
 		self.max = 0
 		self.min = 0	
@@ -34,6 +37,22 @@ class Project:
 		except:
 			self.inputFilePath = None
 			print("There was an error with the input file path.")
+
+
+		## setting output file
+		try:
+			self.outputFileHandle = open('fishAngles.csv', 'x', newline='')
+		except:
+			self.outputFileHandle = None #is this redundant?
+
+		fileNum = 1
+		while(self.outputFileHandle == None):
+			try:
+				self.outputFileHandle = open("fishAngles" + str(fileNum) + ".csv", 'x',newline = '')
+			except:
+				self.outputFileHandle = None #is this redundant?
+				fileNum += 1
+		
 
 	#returns true or false if a frame is read and update the self.frame attribute
 	def getNextFrame(self):
@@ -126,6 +145,7 @@ class Project:
 	#end setROI
 
 	def lineTransform(self):
+
 		edge = cv2.Canny(self.frame,self.min,self.max)
 		cropImg = edge[self.roi1[1]:self.roi2[1] , self.roi1[0]:self.roi2[0]]
 
@@ -166,7 +186,16 @@ class Project:
 
 		plt.tight_layout()
 		plt.show()
-				
+
+	def writeToFile(self, leftAngle = 0, rightAngle = 0):
+
+		if self.writer == None:
+			fieldnames = ['leftEye', 'rightEye']
+			self.writer = writer = csv.DictWriter(self.outputFileHandle, fieldnames=fieldnames)
+			self.writer.writeheader()
+		
+		self.writer.writerow({'leftEye': leftAngle, 'rightEye': rightAngle})
+
 ### separate??
 def resize(img):
 	height,width, _ = img.shape
@@ -184,9 +213,15 @@ SofsProject = Project("TestData//LitFishVid.mp4")
 
 
 #cv2.imshow("Frame",SofsProject.frame)
-SofsProject.EdgeDetec()
-SofsProject.setROI()
-SofsProject.lineTransform()
+#SofsProject.EdgeDetec()
+#SofsProject.setROI()
+#SofsProject.lineTransform()
+
+#SofsProject.writeToFile()
+#SofsProject.writeToFile(1,1)
+#SofsProject.writeToFile(2,2)
+#SofsProject.writeToFile(3,4)
+
 
 
 cv2.waitKey(0)
