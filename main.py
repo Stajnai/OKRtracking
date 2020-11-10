@@ -25,7 +25,7 @@ class Project:
 		self.writer = None
 		self.frame = None
 		self.max = 0
-		self.min = 0	
+		self.min = 0
 		self.roi1 = np.array([0,0])
 		self.roi2 = np.array([0,0])
 
@@ -40,18 +40,19 @@ class Project:
 
 
 		## setting output file
-		try:
-			self.outputFileHandle = open('fishAngles.csv', 'x', newline='')
-		except:
-			self.outputFileHandle = None #is this redundant?
-
-		fileNum = 1
-		while(self.outputFileHandle == None):
+		if self.inputFilePath != None: #I don't want to create an output if input was bad
 			try:
-				self.outputFileHandle = open("fishAngles" + str(fileNum) + ".csv", 'x',newline = '')
+				self.outputFileHandle = open('fishAngles.csv', 'x', newline='')
 			except:
 				self.outputFileHandle = None #is this redundant?
-				fileNum += 1
+
+			fileNum = 1
+			while(self.outputFileHandle == None):
+				try:
+					self.outputFileHandle = open("fishAngles" + str(fileNum) + ".csv", 'x',newline = '')
+				except:
+					self.outputFileHandle = None #is this redundant?
+					fileNum += 1
 		
 
 	#returns true or false if a frame is read and update the self.frame attribute
@@ -217,12 +218,10 @@ SofsProject = Project("TestData//LitFishVid.mp4")
 #SofsProject.setROI()
 #SofsProject.lineTransform()
 
-#SofsProject.writeToFile()
+SofsProject.writeToFile()
 #SofsProject.writeToFile(1,1)
 #SofsProject.writeToFile(2,2)
 #SofsProject.writeToFile(3,4)
-
-
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
