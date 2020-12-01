@@ -39,7 +39,7 @@ class Project:
 			self.inputFilePath = None
 			print("There was an error with the input file path.")
 
-
+	'''
 		## setting output file
 		if self.inputFilePath != None: #I don't want to create an output if input was bad
 			try:
@@ -54,6 +54,7 @@ class Project:
 				except:
 					self.outputFileHandle = None #is this redundant?
 					fileNum += 1
+	'''
 		
 
 	#returns true or false if a frame is read and update the self.frame attribute
@@ -240,7 +241,7 @@ SofsProject = Project("TestData//LitFishVid.mp4")
 #SofsProject.writeToFile(2,2)
 #SofsProject.writeToFile(3,4)
 
-SofsProject.setEyeNum(1)
+SofsProject.setEyeNum(0)
 SofsProject.EdgeDetec()
 SofsProject.setROI()
 SofsProject.lineTransform()
