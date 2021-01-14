@@ -23,15 +23,14 @@ def test_init():
 	#The class attributes
 	assert proj1.inputFilePath == "TestData//LitFishVid.mp4"
 	assert proj1.inputVideo.isOpened() == True
-	assert proj1.outputFileHandle == None
+	assert proj1.outputFileHandle != None
 	assert proj1.writer == None
-	assert len(proj1.frame.shape) == 2 # this means the try..except worked!
+	assert len(proj1.frame.shape) == 2 # this means the try..except for input file worked!
 	assert proj1.max == 0
 	assert proj1.min == 0
 	assert all(proj1.roi1) == all(np.array([0,0]))
 	assert all(proj1.roi2) == all(np.array([0,0]))
 	assert proj1.eyeNum == 0
-
 
 
 ### Notes

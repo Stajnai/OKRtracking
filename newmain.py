@@ -48,11 +48,22 @@ class Project:
 		self.roi2 = np.array([0,0])
 		self.eyeNum = 0
 
-		#check the input file path by trying to read the first frame
+		# Creating input file path and checking by trying to read the first frame
 		try:
 			ret,self.frame = self.inputVideo.read()
 			self.frame = resize(self.frame)
 			self.frame = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
 		except:
-			raise Exception("There was an error with the input file path.")
+			raise Exception("There was an error with the input file path.") #another exception is raised by the try for the size error in shape?
 			
+		# Setting the output file
+		try:
+			self.outputFileHandle = open('fishAngles.csv', 'x', newline='')
+		except:
+			fileNum = 1
+			while(self.outputFileHandle == None):
+				try:
+					self.outputFileHandle = open("fishAngles" + str(fileNum) + ".csv", 'x',newline = '')
+				except:
+					self.outputFileHandle = None #is this redundant?
+					fileNum += 1
