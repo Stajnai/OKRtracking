@@ -39,7 +39,7 @@ class Project:
 			self.inputFilePath = None
 			print("There was an error with the input file path.")
 
-	'''
+	
 		## setting output file
 		if self.inputFilePath != None: #I don't want to create an output if input was bad
 			try:
@@ -54,8 +54,7 @@ class Project:
 				except:
 					self.outputFileHandle = None #is this redundant?
 					fileNum += 1
-	'''
-		
+	
 
 	#returns true or false if a frame is read and update the self.frame attribute
 	def getNextFrame(self):
@@ -217,34 +216,32 @@ class Project:
 
 ### separate??
 def resize(img):
-	height,width, _ = img.shape
-	
-	while (height > 1000 or width > 1000):
-		scale_percent = 0.95
-		width = int(img.shape[1] * scale_percent) #python makes it a float, and it needs an int
-		height = int(img.shape[0] * scale_percent)
-		img = cv2.resize(img,(width,height),interpolation = cv2.INTER_AREA)
+	height,width,__ = img.shape ## Need the blank variable or else "TypeError: argument 1 must have a "write" method"
+
+	scale_percent = 512 / width
+	width = int(img.shape[1] * scale_percent) #python makes it a float, and it needs an int
+	height = int(img.shape[0] * scale_percent)
+	img = cv2.resize(img,(width,height),interpolation = cv2.INTER_AREA)
+
 	return img
 
-
-#this is the "main" function
+	# #this is the "main" function
 SofsProject = Project("TestData//LitFishVid.mp4")
+	
+	# #cv2.imshow("Frame",SofsProject.frame)
+	# #SofsProject.EdgeDetec()
+	# #SofsProject.setROI()
+	# #SofsProject.lineTransform()
 
+	# SofsProject.writeToFile()
+	# SofsProject.writeToFile(1,1)
+	# SofsProject.writeToFile(2,2)
+	# SofsProject.writeToFile(3,4)
 
-#cv2.imshow("Frame",SofsProject.frame)
-#SofsProject.EdgeDetec()
-#SofsProject.setROI()
-#SofsProject.lineTransform()
+	# SofsProject.setEyeNum(0)
+	# SofsProject.EdgeDetec()
+	# SofsProject.setROI()
+	# SofsProject.lineTransform()
 
-#SofsProject.writeToFile()
-#SofsProject.writeToFile(1,1)
-#SofsProject.writeToFile(2,2)
-#SofsProject.writeToFile(3,4)
-
-SofsProject.setEyeNum(0)
-SofsProject.EdgeDetec()
-SofsProject.setROI()
-SofsProject.lineTransform()
-
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+	# cv2.waitKey(0)
+	# cv2.destroyAllWindows()

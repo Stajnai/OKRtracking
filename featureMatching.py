@@ -18,15 +18,16 @@ img2 = cv2.imread('TestData\\Right.png',0) 		# trainImage
 
 # I want to be able to use these, but with the warpPerspective these caused an issue (havent been able to try with warpAffine yet)
 img1 = resize(img1)
-img2 =  resize(img2) 
+img2 =  resize(img2)
 
+'''
 # For testing if the images were correctly loaded
 cv2.imshow("im1",img1)
 cv2.waitKey(0)
 cv2.imshow("im2",img2)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
-
+'''
  
 
 
@@ -41,9 +42,6 @@ bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck = True)
 
 matches = bf.match(des1,des2)
 matches = sorted(matches, key = lambda x: x.distance)
-
-print(matches)
-
 
 # Apply ratio test
 good = []
@@ -84,15 +82,19 @@ h,status = cv2.findHomography(np.float32(list_kp1),np.float32(list_kp2))
 M = np.float32(h) #tried converting to proper noation for warpAffine, but its not good enough
 rows,cols = img2.shape
 
-
+print(M)
 
 #img4 = cv2.warpAffine(img1,M, (cols,rows))
 img4 =  cv2.warpPerspective(img1,h,(cols,rows))
 
 # Display images
-cv2.imshow("Source Image", img1)
-cv2.imshow("Destination Image", img2)
-cv2.imshow("Warped Source Image", img4)
+#cv2.imshow("Source Image", img1)
+#cv2.imshow("Destination Image", img2)
+#cv2.imshow("Warped Source Image", img4)
+#img5 = cv2.subtract(img4,img2)*20
+#cv2.imshow("subtract",img5)
+
+
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
