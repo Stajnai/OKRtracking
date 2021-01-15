@@ -15,20 +15,24 @@ import cv2
 # /None
 
 
-#### GLOBAL VARIABLES ###
-IMG_SIZE = 512
-
 ############################## Helper Functions ########################
-def resize(img):
-	height,width,__ = img.shape ## Need the blank variable or else "TypeError: argument 1 must have a "write" method"
+def resize(img,desiredWidth = 512):
+	try:
+		height,width,__ = img.shape ## Need the blank variable or else "TypeError: argument 1 must have a "write" method"
+	except ValueError:
+		try:
+			height,width = img.shape ## Need the blank variable or else "TypeError: argument 1 must have a "write" method"
+		except:
+			raise Exception("Failure to unpack image shape.")
 
-	scale_percent = IMG_SIZE / width
+
+	scale_percent = desiredWidth / width
 	width = int(img.shape[1] * scale_percent) #python makes it a float, and it needs an int
 	height = int(img.shape[0] * scale_percent)
 	img = cv2.resize(img,(width,height),interpolation = cv2.INTER_AREA)
 
 	return img
-
+########################################################################
 class Project:
 
 	#codec to output the file
@@ -67,3 +71,9 @@ class Project:
 				except:
 					self.outputFileHandle = None #is this redundant?
 					fileNum += 1
+
+
+	def __del__(self):
+		self.outputFileHandle.close()
+
+proj1 = Project("TestData//LitFishVid.mp4")
