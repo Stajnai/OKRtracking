@@ -63,17 +63,17 @@ class Project:
 		# Setting the output file
 		try:
 			self.outputFileHandle = open('fishAngles.csv', 'x', newline='')
+			print("try creation")
 		except:
 			fileNum = 1
 			while(self.outputFileHandle == None):
 				try:
 					self.outputFileHandle = open("fishAngles" + str(fileNum) + ".csv", 'x',newline = '')
+					print("except creation")
 				except:
 					self.outputFileHandle = None #is this redundant?
 					fileNum += 1
 
 
-	def __del__(self):
-		self.outputFileHandle.close()
 
-proj1 = Project("TestData//LitFishVid.mp4")
+#proj1 = Project("TestData//LitFishVid.mp4")
