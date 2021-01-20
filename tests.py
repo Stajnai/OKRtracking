@@ -1,5 +1,5 @@
 # Standard library imports
-import os # ?? may not be needed with the next line
+import os
 import csv
 
 # Third party imports
@@ -25,9 +25,6 @@ def proj1():
 
 def test_init(proj1):
 
-	#create a project
-	#proj1 = okr.Project("TestData//LitFishVid.mp4")
-	'''
 	#The class attributes
 	assert proj1.inputFilePath == "TestData//LitFishVid.mp4"
 	assert proj1.inputVideo.isOpened() == True
@@ -39,19 +36,40 @@ def test_init(proj1):
 	assert all(proj1.roi1) == all(np.array([0,0]))
 	assert all(proj1.roi2) == all(np.array([0,0]))
 	assert proj1.eyeNum == 0
-	'''
-	print("test1")
 
 
 def test_resize(proj1):
-	'''
+
+	# default resize
 	img = okr.resize(proj1.frame)
 	assert img.shape[1]==512
-	#print(proj1.frame.shape)
-	'''
-	print("test2")
 
+	# resize to larger
+	img = okr.resize(img,1024)
+	assert img.shape[1] == 1024
 
+	# resize to smaller
+	img = okr.resize(img,256)
+	assert img.shape[1] == 256
+
+def test_getNextFrame(proj1):
+
+	frame1 = proj1.frame
+	ret, frame2 = proj1.getNextFrame()
+
+	# This does not work with the still image video :(
+	#if ret: 
+		#assert frame1.all() != frame2.all()
+
+	if not ret:
+		assert frame2 == None
+
+	ret = True
+	while ret:
+		ret,frame3 = proj1.getNextFrame()
+	assert frame3 == None
+
+def test_
 ### Notes
 '''
 pytest -rP will show the outputs after the test results

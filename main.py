@@ -240,7 +240,8 @@ SofsProject = Project("TestData//LitFishVid.mp4")
 
 	# SofsProject.setEyeNum(0)
 	# SofsProject.EdgeDetec()
-	# SofsProject.setROI()
+SofsProject.setROI()
+print(SofsProject.roi1, SofsProject.roi2)
 	# SofsProject.lineTransform()
 
 	# cv2.waitKey(0)
