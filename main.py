@@ -212,7 +212,7 @@ class Project:
 		if eyeNum >= -1 and eyeNum <= 1:
 			self.eyeNum = int(eyeNum) #for floating points to be discarded
 		else:
-			print("Bad eye number indicator")
+			raise Exception("Bad eye number indicator")
 
 ### separate??
 def resize(img):
