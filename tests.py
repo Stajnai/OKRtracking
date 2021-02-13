@@ -126,14 +126,14 @@ def test_setEyeNum(proj1):
 
 	with pytest.raises(Exception):
 		proj1.setEyeNum(50.5)
-	
+'''
 def test_AllFunctionsAtOnce():
 	proj = okr.Project("TestData//LitFishVid.mp4")
 
 	cv2.imshow("Frame",proj.frame)
 	proj.writeToFile()
 
-
+	
 	#proj.EdgeDetec()# # WHY IS THIS NOT ALLOWING TO WRITE TO FILE???!!!!!?????!!!!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!
 	proj.setROI()
 	proj.max = 150
@@ -154,7 +154,7 @@ def test_AllFunctionsAtOnce():
 	cv2.waitKey(0)
 	cv2.destroyAllWindows()
 
-
+'''
 ### Notes
 '''
 "pytest -rP .\filename" will show the outputs after the test results

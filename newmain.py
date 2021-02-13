@@ -67,21 +67,20 @@ class Project:
 			
 		# Setting the output file
 		try:
-			self.outputFileHandle = open('fishAngles.csv', 'x', newline='')
+			self.outputFileHandle = open('fishAngles.csv', 'x+', newline='')
 		except:
 			fileNum = 1
 			while(self.outputFileHandle == None):
 				try:
-					self.outputFileHandle = open("fishAngles" + str(fileNum) + ".csv", 'x',newline = '')
+					self.outputFileHandle = open("fishAngles" + str(fileNum) + ".csv", 'x+',newline = '')
 				except:
 					self.outputFileHandle = None #is this redundant?
 					fileNum += 1
-	'''
+	
 	#fixing personal annoyance of deleting files
 	def __del__(self):
-			self.outputFileHandle.close()
-			os.remove(self.outputFileHandle.name)
-	'''
+		self.outputFileHandle.close()
+
 	def getNextFrame(self):
 		prevFrame = self.frame # for a try catch?
 		ret, self.frame = self.inputVideo.read()
@@ -179,9 +178,7 @@ class Project:
 
 	def writeToFile(self, leftAngle = 0, rightAngle = 0):
 
-		print("made it to write to file")
 		if self.writer == None:
-			print("Made it to the column names thing")
 			fieldnames = ['leftEye', 'rightEye']
 			self.writer = csv.DictWriter(self.outputFileHandle, fieldnames=fieldnames)
 			self.writer.writeheader()
@@ -203,20 +200,22 @@ class Project:
 #print(retval)
 #proj1.setROI()
 
+
 proj = Project("TestData//LitFishVid.mp4")
 
 #cv2.imshow("Frame",proj.frame)
-proj.writeToFile()
+#proj.writeToFile()
 
 proj.EdgeDetec()
-proj.max = 150
-proj.min = 100
-proj.setROI()
-proj.lineTransform()
+#proj.max = 150
+#proj.min = 100
+#proj.setROI()
+#proj.lineTransform()
 
 proj.writeToFile()
 proj.writeToFile(1,1)
 proj.writeToFile(2,2)
 proj.writeToFile(3,4)
 
-proj.outputFileHandle.close
+proj.outputFileHandle.close()
+del proj
