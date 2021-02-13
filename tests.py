@@ -86,9 +86,9 @@ def test_writeToFile(proj1):
 	
 	# write to file
 	proj1.writeToFile() #test defaults
-	proj1.writeToFile(leftAngle= 1)
-	proj1.writeToFile(rightAngle= 2)
-	proj1.writeToFile(3,4)
+	proj1.writeToFile([1,0])
+	proj1.writeToFile([0,2])
+	proj1.writeToFile([3,4])
 
 	# close file and open in read mode
 	proj1.outputFileHandle.close()

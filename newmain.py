@@ -80,7 +80,6 @@ class Project:
 	#fixing personal annoyance of deleting files
 	def __del__(self):
 		self.outputFileHandle.close()
-
 	def getNextFrame(self):
 		prevFrame = self.frame # for a try catch?
 		ret, self.frame = self.inputVideo.read()
@@ -116,8 +115,6 @@ class Project:
 
 		cv2.destroyAllWindows()
 
-		self.writeToFile(7,9)
-
 	def setROI(self):
 		roi = cv2.selectROI("Select Region of Interest",self.frame,showCrosshair=False,fromCenter=False)
 		self.roi1 = (roi[0],roi[1])
@@ -136,6 +133,7 @@ class Project:
 		h, theta, d = hough_line(cropImg, theta=tested_angles) # this returns hough transform accumulator, the angles, and distances from orgin to detected line
 
 		# Generating figure 1
+		'''
 		fig, axes = plt.subplots(1, 2, figsize=(15, 6))
 		ax = axes.ravel()
 
@@ -144,29 +142,24 @@ class Project:
 		ax[0].set_axis_off()
 
 		ax[1].imshow(cropImg, cmap=cm.gray)
+		'''
 		origin = np.array((0, cropImg.shape[1])) #origin considered bottom left
 
 		_, angle, dist = hough_line_peaks(h, theta, d,num_peaks= 4)
 
+		
+
 		# finding which eye(s) to try to transform the lines for
-		if self.eyeNum == -1:
-			index = np.where(dist == np.min(dist))
-			y0, y1 = (dist[index] - origin * np.cos(angle[index])) / np.sin(angle[index])
-			ax[1].plot(origin, (y0, y1),label = "left")
-		elif self.eyeNum == 1:
-			index = np.where(dist == np.max(dist))
-			y0, y1 = (dist[index] - origin * np.cos(angle[index])) / np.sin(angle[index])
-			ax[1].plot(origin, (y0, y1),label = "right")
-		else:
-			minIndex = np.where(dist == np.min(dist))
-			maxIndex = np.where(dist == np.max(dist))
+		minIndex = np.where(dist == np.min(dist))
+		maxIndex = np.where(dist == np.max(dist))
 
-			miny0, miny1 = (dist[minIndex] - origin * np.cos(angle[minIndex])) / np.sin(angle[minIndex])
-			maxy0, maxy1 = (dist[maxIndex] - origin * np.cos(angle[maxIndex])) / np.sin(angle[maxIndex])
+		miny0, miny1 = (dist[minIndex] - origin * np.cos(angle[minIndex])) / np.sin(angle[minIndex])
+		maxy0, maxy1 = (dist[maxIndex] - origin * np.cos(angle[maxIndex])) / np.sin(angle[maxIndex])
 
-			ax[1].plot(origin, (miny0, miny1),label = "left")
-			ax[1].plot(origin, (maxy0, maxy1), label = "right")
-
+		'''
+		ax[1].plot(origin, (miny0, miny1),label = "left")
+		ax[1].plot(origin, (maxy0, maxy1), label = "right")
+		
 		ax[1].set_xlim(origin)
 		ax[1].set_ylim((cropImg.shape[0], 0))
 		ax[1].set_axis_off()
@@ -175,8 +168,23 @@ class Project:
 
 		plt.tight_layout()
 		plt.show()
+		'''
 
-	def writeToFile(self, leftAngle = 0, rightAngle = 0):
+		retval = [0,0]
+		if self.eyeNum == -1:
+			retval[0] = angle[minIndex]
+		elif self.eyeNum == 1:
+			retval[1] = angle[maxIndex]
+		else:
+			retval[0] = angle[minIndex]
+			retval[1] = angle[maxIndex]
+
+		return retval
+
+	def writeToFile(self, Angles = [0,0]):
+
+		leftAngle =  Angles[0]
+		rightAngle = Angles[1]
 
 		if self.writer == None:
 			fieldnames = ['leftEye', 'rightEye']
@@ -194,28 +202,13 @@ class Project:
 			raise Exception("Bad eye number indicator")
 
 
-#proj1 = Project("TestData//LitFishVid.mp4")
-#proj1.EdgeDetec()
-#retval = cv2.selectROI("testing123", proj1.frame,True, True)
-#print(retval)
-#proj1.setROI()
-
 
 proj = Project("TestData//LitFishVid.mp4")
 
-#cv2.imshow("Frame",proj.frame)
-#proj.writeToFile()
-
+'''
 proj.EdgeDetec()
-#proj.max = 150
-#proj.min = 100
-#proj.setROI()
-#proj.lineTransform()
+proj.setROI()
+proj.lineTransform()
+'''
 
-proj.writeToFile()
-proj.writeToFile(1,1)
-proj.writeToFile(2,2)
-proj.writeToFile(3,4)
-
-proj.outputFileHandle.close()
-del proj
+proj.__del__() # THIS MUST BE HERE OR THE CSV FILE HANDLE WONT CLOSE AND SHOW THE VALUES IN THE FILE!!! 
