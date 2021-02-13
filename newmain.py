@@ -51,8 +51,8 @@ class Project:
 		self.outputFileHandle = None
 		self.writer = None
 		self.frame = None
-		self.max = 0
 		self.min = 0
+		self.max = 0
 		self.roi1 = None # previously - np.array([0,0]) - trying to see if default value needed
 		self.roi2 = None # np.array([0,0]) * see note above ^^
 		self.eyeNum = 0
@@ -201,7 +201,20 @@ class Project:
 		else:
 			raise Exception("Bad eye number indicator")
 
+	def autoAnalyzeVideo(self):
 
+		#checks
+		while self.roi1 == None or self.roi2 == None:
+			print("Please set the region of interest and try again")
+			self.setROI()
+
+		while self.min == 0 and self.max == 0: # I'm concerned about this boolean not checking both???????????????????????????????????
+			print("Please set the edge detection max and min values")
+			self.EdgeDetec()
+
+		while self.getNextFrame()[0]:
+			self.writeToFile(self.lineTransform())
+			
 
 proj = Project("TestData//LitFishVid.mp4")
 
@@ -210,5 +223,6 @@ proj.EdgeDetec()
 proj.setROI()
 proj.lineTransform()
 '''
+proj.autoAnalyzeVideo()
 
 proj.__del__() # THIS MUST BE HERE OR THE CSV FILE HANDLE WONT CLOSE AND SHOW THE VALUES IN THE FILE!!! 
