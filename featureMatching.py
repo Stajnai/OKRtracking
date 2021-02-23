@@ -20,6 +20,7 @@ img2 = cv2.imread('TestData\\Right.png',0) 		# trainImage
 img1 = resize(img1)
 img2 =  resize(img2)
 
+
 '''
 # For testing if the images were correctly loaded
 cv2.imshow("im1",img1)
