@@ -3,6 +3,9 @@ import os
 import csv
 
 # Third party imports
+from skimage.filters import sobel
+from skimage.segmentation import watershed
+from scipy import ndimage as ndi
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
@@ -56,6 +59,8 @@ class Project:
 		self.roi1 = None # previously - np.array([0,0]) - trying to see if default value needed
 		self.roi2 = None # np.array([0,0]) * see note above ^^
 		self.eyeNum = 0
+		self.Xnose = 0
+		self.Ynose = 0
 
 		# Creating input file path and checking by trying to read the first frame
 		try:
@@ -201,9 +206,47 @@ class Project:
 		else:
 			raise Exception("Bad eye number indicator")
 
+	def findFishNose(self):
+		markers = np.zeros_like(self.frame)
+		markers[self.frame < 30] = 2  # these just work
+		markers[self.frame > 150] = 1 # these just work
+	
+		elevation_map = sobel(self.frame)
+		segmentation = watershed(elevation_map, markers)
+		segmentation = ndi.binary_fill_holes(segmentation - 1) # I believe this sets that background as 0 so we don't change it
+		labeled_img, num_features = ndi.label(segmentation)
+
+		freq = np.argmax(np.bincount(labeled_img.flatten())[1:]) + 1
+		
+		index = np.where(labeled_img == freq)
+
+		self.Ynose = index[0][0]
+		self.Xnose = index[1][index[0] == self.Ynose]
+		
+		def findMed(arr):
+			return arr[int(np.trunc(len(arr)/2))]
+		
+		self.Xnose = findMed(self.Xnose)
+
+	def adjustROI(self):
+
+		if(self.Xnose == 0 and self.Ynose == 0):
+			print("This is an exception")
+
+		roi1dif = (self.roi1[0] - self.Xnose , self.roi1[1] - self.Ynose)
+		roi2dif = (self.roi2[0] - self.Xnose , self.roi2[1] - self.Ynose)
+
+		self.findFishNose()
+		self.roi1 = (roi1dif[0] + self.Xnose, roi1dif[1] + self.Ynose)
+		self.roi2 = (roi2dif[0] + self.Xnose, roi2dif[1] + self.Ynose)
+
+		
+
 	def autoAnalyzeVideo(self):
 
 		#checks
+		self.findFishNose()
+		self.setEyeNum(-1)
 		while self.roi1 == None or self.roi2 == None:
 			print("Please set the region of interest and try again")
 			self.setROI()
@@ -213,10 +256,11 @@ class Project:
 			self.EdgeDetec()
 
 		while self.getNextFrame()[0]:
+			self.adjustROI()
 			self.writeToFile(self.lineTransform())
 			
 
-proj = Project("TestData//LitFishVid.mp4")
+proj = Project("TestData//ZebrafishEyeMvmt_Trim.mp4")
 
 '''
 proj.EdgeDetec()
@@ -224,5 +268,9 @@ proj.setROI()
 proj.lineTransform()
 '''
 proj.autoAnalyzeVideo()
+#proj.findFishNose()
+#proj.setROI()
+#proj.adjustROI()
+
 
 proj.__del__() # THIS MUST BE HERE OR THE CSV FILE HANDLE WONT CLOSE AND SHOW THE VALUES IN THE FILE!!! 

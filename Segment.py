@@ -1,6 +1,5 @@
 from skimage.filters import sobel
 from skimage.segmentation import watershed
-from skimage.feature import peak_local_max
 from scipy import ndimage as ndi
 import matplotlib.pyplot as plt
 import numpy as np
