@@ -53,7 +53,7 @@ print(x[0,:])
 
 x = 25
 maxBlack = 0
-for line in range(x):
+#for line in range(x):
 	
 
 
