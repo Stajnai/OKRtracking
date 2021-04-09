@@ -124,6 +124,8 @@ class Project:
 		roi = cv2.selectROI("Select Region of Interest",self.frame,showCrosshair=False,fromCenter=False)
 		self.roi1 = (roi[0],roi[1])
 		self.roi2 = (roi[0]+roi[2],roi[1]+roi[3]) # openCv selet returns a rectangle(x,y,width,height)
+		print(self.roi1)
+		print(self.roi2)
 
 	def lineTransform(self):
 
@@ -137,8 +139,8 @@ class Project:
 
 		h, theta, d = hough_line(cropImg, theta=tested_angles) # this returns hough transform accumulator, the angles, and distances from orgin to detected line
 
-		# Generating figure 1
 		'''
+		# Generating figure 1
 		fig, axes = plt.subplots(1, 2, figsize=(15, 6))
 		ax = axes.ravel()
 
@@ -158,10 +160,11 @@ class Project:
 		minIndex = np.where(dist == np.min(dist))
 		maxIndex = np.where(dist == np.max(dist))
 
+
 		miny0, miny1 = (dist[minIndex] - origin * np.cos(angle[minIndex])) / np.sin(angle[minIndex])
 		maxy0, maxy1 = (dist[maxIndex] - origin * np.cos(angle[maxIndex])) / np.sin(angle[maxIndex])
 
-		'''
+		'''			
 		ax[1].plot(origin, (miny0, miny1),label = "left")
 		ax[1].plot(origin, (maxy0, maxy1), label = "right")
 		
@@ -172,18 +175,23 @@ class Project:
 		ax[1].legend()
 
 		plt.tight_layout()
-		plt.show()
+		#plt.show()
 		'''
 
 		retval = [0,0]
 		if self.eyeNum == -1:
-			retval[0] = angle[minIndex]
+			retval[0] = angle[minIndex][0]
 		elif self.eyeNum == 1:
-			retval[1] = angle[maxIndex]
+			retval[1] = angle[maxIndex][0]
 		else:
-			retval[0] = angle[minIndex]
-			retval[1] = angle[maxIndex]
+			retval[0] = angle[minIndex][0]
+			retval[1] = angle[maxIndex][0]
 
+		#if(len(retval[0]) > 1):
+		#	print(retval)
+		#	print(len(retval[0]))
+		#	plt.show()
+			#breakpoint()
 		return retval
 
 	def writeToFile(self, Angles = [0,0]):
@@ -240,20 +248,22 @@ class Project:
 		self.roi1 = (roi1dif[0] + self.Xnose, roi1dif[1] + self.Ynose)
 		self.roi2 = (roi2dif[0] + self.Xnose, roi2dif[1] + self.Ynose)
 
-		
-
 	def autoAnalyzeVideo(self):
 
 		#checks
 		self.findFishNose()
 		self.setEyeNum(-1)
 		while self.roi1 == None or self.roi2 == None:
-			print("Please set the region of interest and try again")
-			self.setROI()
+			print("Please set the region of interest")
+			#self.setROI()
+			self.roi1 = (134,111)
+			self.roi2 = (246,163)
 
 		while self.min == 0 and self.max == 0: # I'm concerned about this boolean not checking both???????????????????????????????????
 			print("Please set the edge detection max and min values")
-			self.EdgeDetec()
+			#self.EdgeDetec()
+			self.max = 153
+			self.min = 51
 
 		while self.getNextFrame()[0]:
 			self.adjustROI()
@@ -262,11 +272,13 @@ class Project:
 
 proj = Project("TestData//ZebrafishEyeMvmt_Trim.mp4")
 
-'''
-proj.EdgeDetec()
-proj.setROI()
-proj.lineTransform()
-'''
+
+#proj.EdgeDetec()
+#proj.setROI()
+#proj.lineTransform()
+
+
+proj.setEyeNum(-1)
 proj.autoAnalyzeVideo()
 #proj.findFishNose()
 #proj.setROI()
