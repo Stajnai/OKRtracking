@@ -3,6 +3,9 @@ import os
 import csv
 
 # Third party imports
+from skimage.filters import sobel
+from skimage.segmentation import watershed
+from scipy import ndimage as ndi
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
@@ -51,11 +54,13 @@ class Project:
 		self.outputFileHandle = None
 		self.writer = None
 		self.frame = None
-		self.max = 0
 		self.min = 0
+		self.max = 0
 		self.roi1 = None # previously - np.array([0,0]) - trying to see if default value needed
 		self.roi2 = None # np.array([0,0]) * see note above ^^
 		self.eyeNum = 0
+		self.Xnose = 0
+		self.Ynose = 0
 
 		# Creating input file path and checking by trying to read the first frame
 		try:
@@ -80,7 +85,6 @@ class Project:
 	#fixing personal annoyance of deleting files
 	def __del__(self):
 		self.outputFileHandle.close()
-
 	def getNextFrame(self):
 		prevFrame = self.frame # for a try catch?
 		ret, self.frame = self.inputVideo.read()
@@ -116,12 +120,12 @@ class Project:
 
 		cv2.destroyAllWindows()
 
-		self.writeToFile(7,9)
-
 	def setROI(self):
 		roi = cv2.selectROI("Select Region of Interest",self.frame,showCrosshair=False,fromCenter=False)
 		self.roi1 = (roi[0],roi[1])
 		self.roi2 = (roi[0]+roi[2],roi[1]+roi[3]) # openCv selet returns a rectangle(x,y,width,height)
+		print(self.roi1)
+		print(self.roi2)
 
 	def lineTransform(self):
 
@@ -135,6 +139,7 @@ class Project:
 
 		h, theta, d = hough_line(cropImg, theta=tested_angles) # this returns hough transform accumulator, the angles, and distances from orgin to detected line
 
+		'''
 		# Generating figure 1
 		fig, axes = plt.subplots(1, 2, figsize=(15, 6))
 		ax = axes.ravel()
@@ -144,29 +149,25 @@ class Project:
 		ax[0].set_axis_off()
 
 		ax[1].imshow(cropImg, cmap=cm.gray)
+		'''
 		origin = np.array((0, cropImg.shape[1])) #origin considered bottom left
 
 		_, angle, dist = hough_line_peaks(h, theta, d,num_peaks= 4)
 
+		
+
 		# finding which eye(s) to try to transform the lines for
-		if self.eyeNum == -1:
-			index = np.where(dist == np.min(dist))
-			y0, y1 = (dist[index] - origin * np.cos(angle[index])) / np.sin(angle[index])
-			ax[1].plot(origin, (y0, y1),label = "left")
-		elif self.eyeNum == 1:
-			index = np.where(dist == np.max(dist))
-			y0, y1 = (dist[index] - origin * np.cos(angle[index])) / np.sin(angle[index])
-			ax[1].plot(origin, (y0, y1),label = "right")
-		else:
-			minIndex = np.where(dist == np.min(dist))
-			maxIndex = np.where(dist == np.max(dist))
+		minIndex = np.where(dist == np.min(dist))
+		maxIndex = np.where(dist == np.max(dist))
 
-			miny0, miny1 = (dist[minIndex] - origin * np.cos(angle[minIndex])) / np.sin(angle[minIndex])
-			maxy0, maxy1 = (dist[maxIndex] - origin * np.cos(angle[maxIndex])) / np.sin(angle[maxIndex])
 
-			ax[1].plot(origin, (miny0, miny1),label = "left")
-			ax[1].plot(origin, (maxy0, maxy1), label = "right")
+		miny0, miny1 = (dist[minIndex] - origin * np.cos(angle[minIndex])) / np.sin(angle[minIndex])
+		maxy0, maxy1 = (dist[maxIndex] - origin * np.cos(angle[maxIndex])) / np.sin(angle[maxIndex])
 
+		'''			
+		ax[1].plot(origin, (miny0, miny1),label = "left")
+		ax[1].plot(origin, (maxy0, maxy1), label = "right")
+		
 		ax[1].set_xlim(origin)
 		ax[1].set_ylim((cropImg.shape[0], 0))
 		ax[1].set_axis_off()
@@ -174,9 +175,29 @@ class Project:
 		ax[1].legend()
 
 		plt.tight_layout()
-		plt.show()
+		#plt.show()
+		'''
 
-	def writeToFile(self, leftAngle = 0, rightAngle = 0):
+		retval = [0,0]
+		if self.eyeNum == -1:
+			retval[0] = angle[minIndex][0]
+		elif self.eyeNum == 1:
+			retval[1] = angle[maxIndex][0]
+		else:
+			retval[0] = angle[minIndex][0]
+			retval[1] = angle[maxIndex][0]
+
+		#if(len(retval[0]) > 1):
+		#	print(retval)
+		#	print(len(retval[0]))
+		#	plt.show()
+			#breakpoint()
+		return retval
+
+	def writeToFile(self, Angles = [0,0]):
+
+		leftAngle =  Angles[0]
+		rightAngle = Angles[1]
 
 		if self.writer == None:
 			fieldnames = ['leftEye', 'rightEye']
@@ -193,29 +214,75 @@ class Project:
 		else:
 			raise Exception("Bad eye number indicator")
 
+	def findFishNose(self):
+		markers = np.zeros_like(self.frame)
+		markers[self.frame < 30] = 2  # these just work
+		markers[self.frame > 150] = 1 # these just work
+	
+		elevation_map = sobel(self.frame)
+		segmentation = watershed(elevation_map, markers)
+		segmentation = ndi.binary_fill_holes(segmentation - 1) # I believe this sets that background as 0 so we don't change it
+		labeled_img, num_features = ndi.label(segmentation)
 
-#proj1 = Project("TestData//LitFishVid.mp4")
-#proj1.EdgeDetec()
-#retval = cv2.selectROI("testing123", proj1.frame,True, True)
-#print(retval)
-#proj1.setROI()
+		freq = np.argmax(np.bincount(labeled_img.flatten())[1:]) + 1
+		
+		index = np.where(labeled_img == freq)
+
+		self.Ynose = index[0][0]
+		self.Xnose = index[1][index[0] == self.Ynose]
+		
+		def findMed(arr):
+			return arr[int(np.trunc(len(arr)/2))]
+		
+		self.Xnose = findMed(self.Xnose)
+
+	def adjustROI(self):
+
+		if(self.Xnose == 0 and self.Ynose == 0):
+			print("This is an exception")
+
+		roi1dif = (self.roi1[0] - self.Xnose , self.roi1[1] - self.Ynose)
+		roi2dif = (self.roi2[0] - self.Xnose , self.roi2[1] - self.Ynose)
+
+		self.findFishNose()
+		self.roi1 = (roi1dif[0] + self.Xnose, roi1dif[1] + self.Ynose)
+		self.roi2 = (roi2dif[0] + self.Xnose, roi2dif[1] + self.Ynose)
+
+	def autoAnalyzeVideo(self):
+
+		#checks
+		self.findFishNose()
+		self.setEyeNum(-1)
+		while self.roi1 == None or self.roi2 == None:
+			print("Please set the region of interest")
+			#self.setROI()
+			self.roi1 = (134,111)
+			self.roi2 = (246,163)
+
+		while self.min == 0 and self.max == 0: # I'm concerned about this boolean not checking both???????????????????????????????????
+			print("Please set the edge detection max and min values")
+			#self.EdgeDetec()
+			self.max = 153
+			self.min = 51
+
+		while self.getNextFrame()[0]:
+			self.adjustROI()
+			self.writeToFile(self.lineTransform())
+			
+
+proj = Project("TestData//ZebrafishEyeMvmt_Trim.mp4")
 
 
-proj = Project("TestData//LitFishVid.mp4")
-
-#cv2.imshow("Frame",proj.frame)
-#proj.writeToFile()
-
-proj.EdgeDetec()
-#proj.max = 150
-#proj.min = 100
+#proj.EdgeDetec()
 #proj.setROI()
 #proj.lineTransform()
 
-proj.writeToFile()
-proj.writeToFile(1,1)
-proj.writeToFile(2,2)
-proj.writeToFile(3,4)
 
-proj.outputFileHandle.close()
-del proj
+proj.setEyeNum(-1)
+proj.autoAnalyzeVideo()
+#proj.findFishNose()
+#proj.setROI()
+#proj.adjustROI()
+
+
+proj.__del__() # THIS MUST BE HERE OR THE CSV FILE HANDLE WONT CLOSE AND SHOW THE VALUES IN THE FILE!!! 
