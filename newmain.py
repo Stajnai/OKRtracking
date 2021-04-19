@@ -166,6 +166,7 @@ class Project:
 		miny0, miny1 = (dist[minIndex][0] - origin * np.cos(angle[minIndex][0])) / np.sin(angle[minIndex][0])
 		maxy0, maxy1 = (dist[maxIndex][0] - origin * np.cos(angle[maxIndex][0])) / np.sin(angle[maxIndex][0])
 
+		# The Visuals
 		self.animationFrame = cv2.cvtColor(self.frame, cv2.COLOR_GRAY2BGR)
 
 		if self.eyeNum < 0:
@@ -206,11 +207,6 @@ class Project:
 			retval[0] = angle[minIndex][0]
 			retval[1] = angle[maxIndex][0]
 
-		#if(len(retval[0]) > 1):
-		#	print(retval)
-		#	print(len(retval[0]))
-		#	plt.show()
-			#breakpoint()
 		return retval
 
 	def writeToFile(self, Angles = [0,0]):
@@ -292,24 +288,10 @@ class Project:
 proj = Project("TestData//ZebrafishEyeMvmt_Trim.mp4")
 
 
-#proj.EdgeDetec()
-#proj.setROI()
-#proj.lineTransform()
-
-
 proj.setEyeNum(-1)
 
-fig = plt.figure()
-ax = fig.add_subplot(1,1,1)
-
-def animate(i):
-	ax.clear()
-	ax.imshow(self.animationFrame)
-
 proj.autoAnalyzeVideo()
-#proj.findFishNose()
-#proj.setROI()
-#proj.adjustROI()
+
 
 
 proj.__del__() # THIS MUST BE HERE OR THE CSV FILE HANDLE WONT CLOSE AND SHOW THE VALUES IN THE FILE!!! 
