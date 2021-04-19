@@ -9,6 +9,7 @@ from scipy import ndimage as ndi
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
+import matplotlib.animation as animation
 
 from skimage.transform import hough_line, hough_line_peaks
 import cv2
@@ -61,6 +62,7 @@ class Project:
 		self.eyeNum = 0
 		self.Xnose = 0
 		self.Ynose = 0
+		self.animationFrame = None
 
 		# Creating input file path and checking by trying to read the first frame
 		try:
@@ -135,7 +137,7 @@ class Project:
 		####################################
 		# Classic straight-line Hough transform
 		# Set a precision of 0.5 degree.
-		tested_angles = np.linspace(-np.pi / 2, np.pi / 2, 360)# This is saying take 360*2 steps from -90 counter cloack wise to +90*(180/np.pi)
+		tested_angles = np.linspace((-np.pi / 2) + (np.pi / 4) , (np.pi / 2) - (np.pi / 4 ), 360)# This is saying take 360*2 steps from -45 counter cloack wise to +45*(180/np.pi)
 
 		h, theta, d = hough_line(cropImg, theta=tested_angles) # this returns hough transform accumulator, the angles, and distances from orgin to detected line
 
@@ -161,9 +163,27 @@ class Project:
 		maxIndex = np.where(dist == np.max(dist))
 
 
-		miny0, miny1 = (dist[minIndex] - origin * np.cos(angle[minIndex])) / np.sin(angle[minIndex])
-		maxy0, maxy1 = (dist[maxIndex] - origin * np.cos(angle[maxIndex])) / np.sin(angle[maxIndex])
+		miny0, miny1 = (dist[minIndex][0] - origin * np.cos(angle[minIndex][0])) / np.sin(angle[minIndex][0])
+		maxy0, maxy1 = (dist[maxIndex][0] - origin * np.cos(angle[maxIndex][0])) / np.sin(angle[maxIndex][0])
 
+		# The Visuals
+		self.animationFrame = cv2.cvtColor(self.frame, cv2.COLOR_GRAY2BGR)
+
+		if self.eyeNum < 0:
+			self.animationFrame = cv2.line(self.animationFrame,(self.roi1[0],self.roi1[1] +
+			int(miny0)),(self.roi2[0],self.roi2[1] + int(miny1)),(0,255,0), thickness=2)
+		elif self.eyeNum > 0:
+			self.animationFrame = cv2.line(self.animationFrame,(self.roi1[0],self.roi1[1] +
+			int(maxy0)),(self.roi2[0],self.roi2[1] + int(maxy1)),(0,255,255), thickness=2)
+		else:
+			self.animationFrame = cv2.line(self.animationFrame,(self.roi1[0],self.roi1[1] +
+			int(miny0)),(self.roi2[0],self.roi2[1] + int(miny1)),(0,255,0), thickness=2)
+
+			self.animationFrame = cv2.line(self.animationFrame,(self.roi1[0],self.roi1[1] +
+			int(maxy0)),(self.roi2[0],self.roi2[1] + int(maxy1)),(0,255,255), thickness=2)
+
+		cv2.imshow("Lines", self.animationFrame)
+		cv2.waitKey(1)
 		'''			
 		ax[1].plot(origin, (miny0, miny1),label = "left")
 		ax[1].plot(origin, (maxy0, maxy1), label = "right")
@@ -187,11 +207,6 @@ class Project:
 			retval[0] = angle[minIndex][0]
 			retval[1] = angle[maxIndex][0]
 
-		#if(len(retval[0]) > 1):
-		#	print(retval)
-		#	print(len(retval[0]))
-		#	plt.show()
-			#breakpoint()
 		return retval
 
 	def writeToFile(self, Angles = [0,0]):
@@ -273,16 +288,10 @@ class Project:
 proj = Project("TestData//ZebrafishEyeMvmt_Trim.mp4")
 
 
-#proj.EdgeDetec()
-#proj.setROI()
-#proj.lineTransform()
-
-
 proj.setEyeNum(-1)
+
 proj.autoAnalyzeVideo()
-#proj.findFishNose()
-#proj.setROI()
-#proj.adjustROI()
+
 
 
 proj.__del__() # THIS MUST BE HERE OR THE CSV FILE HANDLE WONT CLOSE AND SHOW THE VALUES IN THE FILE!!! 
