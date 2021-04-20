@@ -285,13 +285,13 @@ class Project:
 			self.writeToFile(self.lineTransform())
 			
 
-proj = Project("TestData//ZebrafishEyeMvmt_Trim.mp4")
+#proj = Project("TestData//ZebrafishEyeMvmt_Trim.mp4")
 
 
-proj.setEyeNum(-1)
+#proj.setEyeNum(-1)
 
-proj.autoAnalyzeVideo()
+#proj.autoAnalyzeVideo()
 
 
 
-proj.__del__() # THIS MUST BE HERE OR THE CSV FILE HANDLE WONT CLOSE AND SHOW THE VALUES IN THE FILE!!! 
+#proj.__del__() # THIS MUST BE HERE OR THE CSV FILE HANDLE WONT CLOSE AND SHOW THE VALUES IN THE FILE!!! 
