@@ -98,8 +98,7 @@ class Project:
 	def EdgeDetec(self):
 		windowName = "Edge Detection"
 
-		cv2.startWindowThread()
-		cv2.namedWindow(windowName, cv2.WINDOW_NORMAL)
+		cv2.namedWindow(windowName, cv2.WINDOW_AUTOSIZE)
 		#cv2.resizeWindow(windowName,self.frame.shape[1],self.frame.shape[0]+100)
 
 		def setMin(Min) :
@@ -114,9 +113,9 @@ class Project:
 			
 			edge = cv2.Canny(self.frame, self.min, self.max)
 
-			cv2.imshow("Image",edge)
+			cv2.imshow(windowName, edge)
 
-			if cv2.waitKey(1) & 0xff == ord('q') or cv2.waitKey(1) & 0xff == ord('d'): #ord returns the unicode of that letter. 0xff makes it only look at 
+			if cv2.waitKey(1) & 0xff == ord(' '): #ord returns the unicode of that letter. 0xff makes it only look at 
 				#the last 8 bits of the wait key because it is 32bits and the incode is only 8 bits
 				break
 
@@ -126,8 +125,7 @@ class Project:
 		roi = cv2.selectROI("Select Region of Interest",self.frame,showCrosshair=False,fromCenter=False)
 		self.roi1 = (roi[0],roi[1])
 		self.roi2 = (roi[0]+roi[2],roi[1]+roi[3]) # openCv selet returns a rectangle(x,y,width,height)
-		print(self.roi1)
-		print(self.roi2)
+	
 
 	def lineTransform(self):
 
@@ -264,34 +262,28 @@ class Project:
 		self.roi2 = (roi2dif[0] + self.Xnose, roi2dif[1] + self.Ynose)
 
 	def autoAnalyzeVideo(self):
-
+		'''
 		#checks
 		self.findFishNose()
-		self.setEyeNum(-1)
+		#eye num is set in the GUI
 		while self.roi1 == None or self.roi2 == None:
 			print("Please set the region of interest")
-			#self.setROI()
-			self.roi1 = (134,111)
-			self.roi2 = (246,163)
+			self.setROI()
+			#self.roi1 = (134,111)
+			#self.roi2 = (246,163)
 
 		while self.min == 0 and self.max == 0: # I'm concerned about this boolean not checking both???????????????????????????????????
 			print("Please set the edge detection max and min values")
-			#self.EdgeDetec()
-			self.max = 153
-			self.min = 51
+			self.EdgeDetec()
+			#self.max = 153
+			#self.min = 51
+		'''
 
 		while self.getNextFrame()[0]:
 			self.adjustROI()
 			self.writeToFile(self.lineTransform())
+		
+		
 			
 
-proj = Project("TestData//ZebrafishEyeMvmt_Trim.mp4")
-
-
-proj.setEyeNum(-1)
-
-proj.autoAnalyzeVideo()
-
-
-
-proj.__del__() # THIS MUST BE HERE OR THE CSV FILE HANDLE WONT CLOSE AND SHOW THE VALUES IN THE FILE!!! 
+#proj.__del__() # THIS MUST BE HERE OR THE CSV FILE HANDLE WONT CLOSE AND SHOW THE VALUES IN THE FILE!!! 
