@@ -4,8 +4,8 @@ __pycache__/
 *$py.class
 
 #sofs added files
-*.mp4
-*.avi
+#*.mp4
+#*.avi
 
 # C extensions
 *.so
