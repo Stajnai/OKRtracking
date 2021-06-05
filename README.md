@@ -1,6 +1,6 @@
 # Optokinetic Response Tracking Software (Senior Thesis)
 Written By: Sophia Tajnai\
-Contact me with Questions: Sophia.Tajnai@gmail.com
+Contact me with questions: Sophia.Tajnai@gmail.com
 
 ## Purpose
 #### Video Explanation: [https://www.youtube.com/watch?v=3OEmxjHBf3E]
