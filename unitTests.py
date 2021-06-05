@@ -10,8 +10,11 @@ import numpy as np
 import pytest
 from skimage.transform import hough_line, hough_line_peaks
 
+# to run, 'pytest .\thisfilename'
+# you can add optional '-rP' after pytest to see outputs after the tests
+
 # Local application imports
-import newmain as okr
+import OKR_Analyze as okr
 
 @pytest.fixture
 def proj1():
@@ -30,11 +33,14 @@ def test_init(proj1):
 	assert proj1.outputFileHandle != None
 	assert proj1.writer == None
 	assert len(proj1.frame.shape) == 2 # this means the try..except for input file worked!
-	assert proj1.max == 0
 	assert proj1.min == 0
+	assert proj1.max == 0
 	assert proj1.roi1 == None #all(proj1.roi1) == all(np.array([0,0]))
 	assert proj1.roi2 == None #all(proj1.roi2) == all(np.array([0,0]))
 	assert proj1.eyeNum == 0
+	assert proj1.Xnose == 0
+	assert proj1.Xnose == 0
+	assert proj1.animationFrame == None
 
 def test_resize(proj1):
 
@@ -126,35 +132,7 @@ def test_setEyeNum(proj1):
 
 	with pytest.raises(Exception):
 		proj1.setEyeNum(50.5)
-'''
-def test_AllFunctionsAtOnce():
-	proj = okr.Project("TestData//LitFishVid.mp4")
 
-	cv2.imshow("Frame",proj.frame)
-	proj.writeToFile()
-
-	
-	#proj.EdgeDetec()# # WHY IS THIS NOT ALLOWING TO WRITE TO FILE???!!!!!?????!!!!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!
-	proj.setROI()
-	proj.max = 150
-	proj.min = 80
-	proj.lineTransform()
-
-	proj.writeToFile()
-	proj.writeToFile(1,1)
-	proj.writeToFile(2,2)
-	proj.writeToFile(3,4)
-
-	#proj.setEyeNum(0)
-	#proj.EdgeDetec()
-	#proj.setROI()
-	#print(proj.roi1, proj.roi2)
-	#proj.lineTransform()
-
-	cv2.waitKey(0)
-	cv2.destroyAllWindows()
-
-'''
 ### Notes
 '''
 "pytest -rP .\filename" will show the outputs after the test results
