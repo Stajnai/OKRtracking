@@ -1,16 +1,22 @@
 # Standard library imports
+import os
 import csv
 
 # Third party imports
 from skimage.filters import sobel
 from skimage.segmentation import watershed
-from skimage.transform import hough_line, hough_line_peaks
 from scipy import ndimage as ndi
 import numpy as np
+import matplotlib.pyplot as plt
 from matplotlib import cm
+import matplotlib.animation as animation
 
+from skimage.transform import hough_line, hough_line_peaks
 import cv2
-# import matplotlib.pyplot as plt # not used on final product, but used for testing/development
+
+# Local application imports
+# /None
+
 
 ############################## Helper Functions ########################
 
@@ -277,3 +283,7 @@ class Project:
 			self.adjustROI()
 			self.writeToFile(self.lineTransform())
 		
+		
+			
+
+#proj.__del__() # THIS MUST BE HERE OR THE CSV FILE HANDLE WONT CLOSE AND SHOW THE VALUES IN THE FILE!!! 
