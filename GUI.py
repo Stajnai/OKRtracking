@@ -1,8 +1,9 @@
 from tkinter import *
 from tkinter import filedialog
 from PIL import Image,ImageTk
-import OKR_Analyze as okr
 import cv2
+
+import OKR_Analyze as okr
 
 # Create a tkinter window
 window = Tk()
